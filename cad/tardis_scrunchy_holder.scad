@@ -287,32 +287,12 @@ module phone_pocket_2d() {
         square([pw, ph], center = true);
 }
 
-module handle_cut() {
-    translate([right_door_cx() + door_w() * 0.22, body_d / 2 - 0.6,
-               plinth_h + 1.45 * row_h()])
-        rotate([-90, 0, 0]) {
-            cylinder(h = 4.2, r = 2.2);
-            translate([0, 0, 3.7])
-                rotate([0, 90, 0])
-                    cylinder(h = 9.6, r = 1.85, center = true);
-        }
-}
-
-module badge_cut() {
-    translate([right_door_cx(), body_d / 2 - 0.2,
-               plinth_h + 0.55 * row_h()])
-        rotate([-90, 0, 0])
-            cylinder(h = 2.4, r = 5.1);
-}
-
 module blue_part() {
     difference() {
         blue_solid();
         interior_cavity();
         scrunchy_slot_cut();
         door_gap_cut();
-        handle_cut();
-        badge_cut();
         front_inlay(window_pocket_d + 0.05) two_bay_windows_2d();
         front_inlay(panel_recess) panel_squares_2d();
         front_inlay(sign_d + sign_recess + 0.05)
@@ -372,30 +352,6 @@ module black_part() {
             offset(delta = -1.25) phone_pocket_2d();
 }
 
-module gold_handle() {
-    translate([right_door_cx() + door_w() * 0.22, body_d / 2 - 0.4,
-               plinth_h + 1.45 * row_h()])
-        rotate([-90, 0, 0]) {
-            cylinder(h = 3.2, r = 2.0);
-            translate([0, 0, 3.1])
-                rotate([0, 90, 0])
-                    cylinder(h = 9.0, r = 1.6, center = true);
-        }
-}
-
-module gold_badge() {
-    translate([right_door_cx(), body_d / 2 - 0.6,
-               plinth_h + 0.55 * row_h()])
-        rotate([-90, 0, 0]) {
-            cylinder(h = 1.4, r = 4.9);
-            // St John-style cross, proud of the disc
-            translate([0, 0, 1.5])
-                cube([1.8, 7.0, 1.4], center = true);
-            translate([0, 0, 1.5])
-                cube([7.0, 1.8, 1.4], center = true);
-        }
-}
-
 module gold_lamp() {
     translate([0, 0, lamp_z0()]) {
         translate([0, 0, lamp_base_h / 2])
@@ -424,8 +380,6 @@ module gold_lamp() {
 }
 
 module gold_part() {
-    gold_handle();
-    gold_badge();
     gold_lamp();
 }
 
