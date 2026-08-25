@@ -1,8 +1,8 @@
 // TARDIS-style scrunchy holder.
-// Front reads as a police box. The box is a hollow shell. Right side
-// has a scrunchy slide that opens into that hollow: a 40% wide centered
-// channel with 90% x 25mm loading slots, 5mm from the top and bottom,
-// all corners rounded.
+// Front reads as a police box. The box is a hollow shell. Left and right
+// sides each have a scrunchy slide that opens into that hollow: a 40% wide
+// centered channel with 90% x 25mm loading slots, 5mm from the top and
+// bottom, all corners rounded.
 //
 // Export parts for Bambu AMS (same origin, complementary volumes):
 //   openscad -D PART=\"blue\"  -o print/tardis_blue.stl  cad/tardis_scrunchy_holder.scad
@@ -33,7 +33,7 @@ wall_back = 3.6;
 wall_left = 3.6;
 wall_right = 3.6;
 floor_t = 3;
-// Punch the side slide through the right wall into the hollow.
+// Punch each side slide through its wall into the hollow.
 slot_depth = wall_right + 10;
 
 slot_margin = 5;
@@ -105,12 +105,17 @@ module slot_profile_2d() {
                     }
 }
 
-module scrunchy_slot_cut() {
-    // Extrude the YZ profile in -X from the right face.
+module scrunchy_slot_one_side() {
     translate([body_w / 2 + 0.4, 0, 0])
         rotate([0, -90, 0])
             linear_extrude(height = slot_depth + 0.8, convexity = 8)
                 slot_profile_2d();
+}
+
+module scrunchy_slot_cut() {
+    scrunchy_slot_one_side();
+    mirror([1, 0, 0])
+        scrunchy_slot_one_side();
 }
 
 module pane_muntins_2d(w, h) {
@@ -231,20 +236,15 @@ module blue_solid() {
     translate([0, 0, plinth_h + (bh - plinth_h) / 2])
         cube([bw, bd, bh - plinth_h], center = true);
 
-    // Corner posts, proud on front / left / back. Right face stays flat for the slide.
+    // Corner posts proud on front and back. Left and right faces stay flat for the slides.
     post_proud = 0.9;
     post_d_front = bd + post_proud;
     for (sx = [-1, 1]) {
-        // Front-left and front-right posts (front proud)
         translate([sx * (bw / 2 - post_w / 2), post_proud / 2, plinth_h + post_h / 2])
             cube([post_w, post_d_front, post_h], center = true);
-        // Back posts (back proud)
         translate([sx * (bw / 2 - post_w / 2), -post_proud / 2, plinth_h + post_h / 2])
             cube([post_w, bd + post_proud, post_h], center = true);
     }
-    // Left-face post wrap already covered by X positions. Extra left proud:
-    translate([-(bw / 2 + post_proud / 2), 0, plinth_h + post_h / 2])
-        cube([post_proud, bd - 2, post_h], center = true);
 
     // Cornice / lintel wrap
     translate([0, 0, plinth_h + post_h + sign_h + cornice_h / 2])
@@ -319,8 +319,6 @@ module blue_part() {
                 square([inner_w() - 2 * sign_inset, sign_h - 1.6], center = true);
         front_inlay(window_pocket_d)
             phone_pocket_2d();
-        left_inlay(window_pocket_d + 0.05) two_bay_windows_2d();
-        left_inlay(panel_recess) panel_squares_2d();
         back_inlay(window_pocket_d + 0.05) two_bay_windows_2d();
         back_inlay(panel_recess) panel_squares_2d();
     }
@@ -329,7 +327,6 @@ module blue_part() {
 module white_part() {
     // Window muntins, flush with the outer faces.
     front_inlay(muntin_d) two_bay_muntins_2d();
-    left_inlay(muntin_d) two_bay_muntins_2d();
     back_inlay(muntin_d) two_bay_muntins_2d();
 
     // Phone hatch frame
@@ -356,8 +353,6 @@ module black_part() {
     shift = muntin_d + 0.1;
     translate([0, -shift, 0])
         front_inlay(back_d) two_bay_windows_2d();
-    translate([shift, 0, 0])
-        left_inlay(back_d) two_bay_windows_2d();
     translate([0, shift, 0])
         back_inlay(back_d) two_bay_windows_2d();
 
