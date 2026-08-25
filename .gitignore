@@ -1,0 +1,4 @@
+print/*.png
+!print/tardis_preview.png
+!print/tardis_34.png
+scripts/__pycache__/
