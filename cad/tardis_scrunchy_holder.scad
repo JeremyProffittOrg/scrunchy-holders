@@ -144,8 +144,9 @@ module pane_glass_2d(w, h) {
 }
 
 module sign_letters_2d() {
-    text("POLICE BOX", size = 7.4, font = sign_font,
-         halign = "center", valign = "center", spacing = 1.03);
+    mirror([1, 0])
+        text("POLICE BOX", size = 7.4, font = sign_font,
+             halign = "center", valign = "center", spacing = 1.03);
 }
 
 // 2D (x,y) -> front face (X, Z), extruded toward -Y.
