@@ -139,12 +139,8 @@ module pane_glass_2d(w, h) {
 }
 
 module sign_letters_2d() {
-    translate([0, 2.35])
-        text("POLICE", size = 5.8, font = sign_font,
-             halign = "center", valign = "center", spacing = 1.04);
-    translate([0, -3.15])
-        text("BOX", size = 5.8, font = sign_font,
-             halign = "center", valign = "center", spacing = 1.08);
+    text("POLICE BOX", size = 7.4, font = sign_font,
+         halign = "center", valign = "center", spacing = 1.03);
 }
 
 // 2D (x,y) -> front face (X, Z), extruded toward -Y.
