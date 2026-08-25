@@ -1,7 +1,8 @@
 // TARDIS-style scrunchy holder.
-// Front reads as a police box. Right side has a scrunchy slide:
-// a 40% wide centered channel with 90% x 25mm loading slots,
-// 5mm from the top and bottom, all corners rounded.
+// Front reads as a police box. The box is a hollow shell. Right side
+// has a scrunchy slide that opens into that hollow: a 40% wide centered
+// channel with 90% x 25mm loading slots, 5mm from the top and bottom,
+// all corners rounded.
 //
 // Export parts for Bambu AMS (same origin, complementary volumes):
 //   openscad -D PART=\"blue\"  -o print/tardis_blue.stl  cad/tardis_scrunchy_holder.scad
@@ -27,12 +28,13 @@ roof_step_inset = 3.2;
 roof_pyramid_h = 9;
 roof_pyramid_top = 22;
 
-wall_front = 8;
-wall_back = 5;
-wall_left = 5;
-slot_depth = 16;
-wall_right = slot_depth + 5;
-floor_t = 5;
+wall_front = 6;
+wall_back = 3.6;
+wall_left = 3.6;
+wall_right = 3.6;
+floor_t = 3;
+// Punch the side slide through the right wall into the hollow.
+slot_depth = wall_right + 10;
 
 slot_margin = 5;
 slot_end_h = 25;
@@ -264,13 +266,13 @@ module blue_solid() {
 }
 
 module interior_cavity() {
-    // Keep a wall behind the scrunchy pocket so scrunchies cannot fall inside.
+    // Empty shell: thin walls, floor, and a solid roof/sign cap.
     x0 = -body_w / 2 + wall_left;
     x1 = body_w / 2 - wall_right;
     y0 = -body_d / 2 + wall_back;
     y1 = body_d / 2 - wall_front;
     z0 = floor_t;
-    z1 = plinth_h + post_h - 3;
+    z1 = body_h() - 3;
     translate([x0, y0, z0])
         cube([x1 - x0, y1 - y0, z1 - z0]);
 }

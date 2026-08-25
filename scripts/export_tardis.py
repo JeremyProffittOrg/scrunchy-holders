@@ -267,8 +267,9 @@ def write_3mf(stl_paths: list[str], preview_png: str | None) -> str:
         elif len(v) == nslot * 2:
             proj[k] = [v[0], v[1]] * nslot
     proj["from"] = "project"
+    # Through-slot into the hollow needs support under the slot roofs.
     if "enable_support" in proj:
-        proj["enable_support"] = "0"
+        proj["enable_support"] = "1"
 
     content_types = (
         '<?xml version="1.0" encoding="UTF-8"?>\n'
