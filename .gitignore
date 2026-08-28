@@ -1,4 +1,5 @@
 print/*.png
 !print/tardis_preview.png
 !print/tardis_34.png
+print/guide-pages/
 scripts/__pycache__/
