@@ -73,7 +73,8 @@ function flag_w() = window_w() - 2 * muntin;
 function flag_h() = window_h() - 2 * muntin;
 function back_flag_w() = inner_w() - 4;
 function back_flag_h() = back_flag_w() * 3 / 5;
-function back_flag_z() = plinth_h + post_h * 0.52;
+function back_flag_z() =
+    plinth_h + post_h - 2.4 - back_flag_frame - back_flag_h() / 2;
 back_flag_frame = 2.2;
 back_flag_d = 1.8;
 function sign_z() = plinth_h + post_h + sign_h / 2;
@@ -572,24 +573,23 @@ module white_part() {
         uk_flag_white_2d(flag_w(), flag_h());
     back_inlay(back_flag_d)
         back_flag_at_2d()
-            union() {
-                uk_flag_white_2d(back_flag_w(), back_flag_h());
-                uk_flag_frame_2d(back_flag_w(), back_flag_h(), back_flag_frame);
-            }
+            uk_flag_white_2d(back_flag_w(), back_flag_h());
 }
 
 module blue_part() {
+    front_inlay(muntin_d) all_window_muntins_2d();
+    front_inlay(muntin_d) jack_window_frame_2d();
     flag_inlay(glass_back_d())
         uk_flag_blue_2d(flag_w(), flag_h());
     back_inlay(back_flag_d)
         back_flag_at_2d()
-            uk_flag_blue_2d(back_flag_w(), back_flag_h());
+            union() {
+                uk_flag_blue_2d(back_flag_w(), back_flag_h());
+                uk_flag_frame_2d(back_flag_w(), back_flag_h(), back_flag_frame);
+            }
 }
 
 module black_part() {
-    front_inlay(muntin_d) all_window_muntins_2d();
-    front_inlay(muntin_d) jack_window_frame_2d();
-
     translate([0, -sign_recess, 0])
         front_inlay(sign_d)
             sign_letters_2d();
