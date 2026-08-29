@@ -1,6 +1,6 @@
 """Export UK phone-booth holder STLs from OpenSCAD and pack a Bambu Studio 3MF.
 
-The 3MF is one object with five AMS parts (red / white / blue / black / gold)
+The 3MF is one object with four AMS parts (red / white / blue / black)
 sharing a single origin so they print as a multi-color assembly.
 """
 from __future__ import annotations
@@ -26,15 +26,14 @@ TEMPLATE_3MF = (
 )
 
 PARTS = [
-    ("red",   "body_red",     1),
+    ("red",   "body_red",      1),
     ("white", "windows_white", 2),
-    ("blue",  "flag_blue",    3),
-    ("black", "glass_black",  4),
-    ("gold",  "trim_gold",    5),
+    ("blue",  "flag_blue",     3),
+    ("black", "trim_black",    4),
 ]
 
-# Post Office red, ivory, Union Jack blue, near-black, crown gold.
-FILAMENT_COLOURS = ["#C8102E", "#F4F1E8", "#012169", "#1A1A1A", "#D4A017"]
+# Post Office red, ivory, Union Jack blue, near-black.
+FILAMENT_COLOURS = ["#C8102E", "#F4F1E8", "#012169", "#1A1A1A"]
 
 PREVIEWS = [
     ("uk_phone_booth_preview.png", "0,0,0,62,0,142,430"),

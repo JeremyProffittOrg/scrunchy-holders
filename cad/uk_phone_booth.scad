@@ -11,9 +11,8 @@
 //   openscad -D PART=\"white\" -o print/uk_phone_booth_white.stl cad/uk_phone_booth.scad
 //   openscad -D PART=\"blue\"  -o print/uk_phone_booth_blue.stl  cad/uk_phone_booth.scad
 //   openscad -D PART=\"black\" -o print/uk_phone_booth_black.stl cad/uk_phone_booth.scad
-//   openscad -D PART=\"gold\"  -o print/uk_phone_booth_gold.stl  cad/uk_phone_booth.scad
 
-PART = "all"; // all | red | white | blue | black | gold
+PART = "all"; // all | red | white | blue | black
 
 $fa = 8;
 $fs = 0.45;
@@ -573,23 +572,27 @@ module white_part() {
         uk_flag_white_2d(flag_w(), flag_h());
     back_inlay(back_flag_d)
         back_flag_at_2d()
-            uk_flag_white_2d(back_flag_w(), back_flag_h());
+            union() {
+                uk_flag_white_2d(back_flag_w(), back_flag_h());
+                uk_flag_frame_2d(back_flag_w(), back_flag_h(), back_flag_frame);
+            }
+    four_crowns(crown_d);
+    translate([0, 0, dome_peak_z() + lamp_ball_r * 0.55])
+        sphere(r = lamp_ball_r, $fn = 24);
 }
 
 module blue_part() {
-    front_inlay(muntin_d) all_window_muntins_2d();
-    front_inlay(muntin_d) jack_window_frame_2d();
     flag_inlay(glass_back_d())
         uk_flag_blue_2d(flag_w(), flag_h());
     back_inlay(back_flag_d)
         back_flag_at_2d()
-            union() {
-                uk_flag_blue_2d(back_flag_w(), back_flag_h());
-                uk_flag_frame_2d(back_flag_w(), back_flag_h(), back_flag_frame);
-            }
+            uk_flag_blue_2d(back_flag_w(), back_flag_h());
 }
 
 module black_part() {
+    front_inlay(muntin_d) all_window_muntins_2d();
+    front_inlay(muntin_d) jack_window_frame_2d();
+
     translate([0, -sign_recess, 0])
         front_inlay(sign_d)
             sign_letters_2d();
@@ -597,12 +600,6 @@ module black_part() {
     translate([0, sign_recess, 0])
         back_inlay(sign_d)
             back_sign_letters_2d();
-}
-
-module gold_part() {
-    four_crowns(crown_d);
-    translate([0, 0, dome_peak_z() + lamp_ball_r * 0.55])
-        sphere(r = lamp_ball_r, $fn = 24);
 }
 
 module assembly() {
@@ -614,8 +611,6 @@ module assembly() {
         color("#012169") blue_part();
     if (PART == "all" || PART == "black")
         color("#1A1A1A") black_part();
-    if (PART == "all" || PART == "gold")
-        color("#D4A017") gold_part();
 }
 
 assembly();
