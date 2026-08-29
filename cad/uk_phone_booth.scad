@@ -1,10 +1,9 @@
 // UK K6 red telephone-box scrunchy holder.
-// Front reads as a Giles Gilbert Scott K6. The box is a hollow shell.
-// Left and right sides each have a scrunchy slide that opens into that
-// hollow: a 40% wide centered channel with 90% x 25mm loading slots,
-// 5mm from the top and bottom of the main box, all corners rounded.
-// Back carries a 3:5 Union Flag. Gold Tudor crowns sit in the four
-// pediments.
+// Front reads as a Giles Gilbert Scott K6 with TARDIS-style two-bay
+// windows (2 x 3 panes, black muntins, white glass). The left window
+// holds a Union Flag. The box is a hollow shell. Left and right sides
+// each have a scrunchy slide: a 40% wide centered channel with 90% x
+// 25mm loading slots, 5mm from the top and bottom, rounded corners.
 //
 // Export parts for Bambu AMS (same origin, complementary volumes):
 //   openscad -D PART=\"red\"   -o print/uk_phone_booth_red.stl   cad/uk_phone_booth.scad
@@ -42,13 +41,16 @@ slot_slide_frac = 0.40;
 slot_end_frac = 0.90;
 slot_corner_r = 5;
 
-window_margin = 2.4;
-window_rows = 8;
-window_cols = 3;
+panel_inset = 2.4;
+panel_gap = 2.2;
+panel_recess = 1.7;
+door_gap = 1.5;
+window_margin = 2.2;
+window_cols = 2;
+window_rows = 3;
 muntin = 1.35;
 window_pocket_d = 3.6;
 muntin_d = 1.5;
-side_pane_frac = 0.16;
 
 sign_inset = 2.2;
 sign_d = 2.2;
@@ -56,24 +58,25 @@ sign_recess = 0.5;
 sign_font = "Times New Roman:style=Bold";
 sign_size = 6.6;
 
-flag_w = 70;
-flag_h = 42;
-flag_d = 1.8;
-flag_frame = 1.8;
 crown_d = 1.6;
 
 lamp_ball_r = 3.4;
 
 function body_h() = plinth_h + post_h + sign_h + cornice_h;
+function row_h() = post_h / 4;
 function inner_w() = body_w - 2 * post_w;
-function window_w() = inner_w() - 2 * window_margin;
-function window_h() = post_h - 2 * window_margin;
-function window_z() = plinth_h + post_h / 2;
+function door_w() = (inner_w() - door_gap) / 2;
+function left_door_cx() = -(door_gap / 2 + door_w() / 2);
+function right_door_cx() = (door_gap / 2 + door_w() / 2);
+function window_w() = door_w() - 2 * window_margin;
+function window_h() = row_h() - 2 * window_margin;
+function window_z() = plinth_h + 3 * row_h() + row_h() / 2;
+function flag_w() = window_w() - 2 * muntin;
+function flag_h() = window_h() - 2 * muntin;
 function sign_z() = plinth_h + post_h + sign_h / 2;
 function roof_z0() = body_h();
 function crown_z() = roof_z0() + pediment_h * 0.36;
 function dome_peak_z() = roof_z0() + pediment_h + 3.2;
-function flag_z() = plinth_h + post_h * 0.48;
 function handle_z() = plinth_h + post_h * 0.44;
 function handle_x() = -(body_w / 2 - post_w - 7.5);
 function pediment_face() = body_d / 2 + 0.8;
@@ -165,46 +168,63 @@ module right_inlay(d) {
             children();
 }
 
-function col_spec() =
-    let (
-        m = muntin,
-        inner = window_w() - (window_cols + 1) * m,
-        w0 = inner * side_pane_frac,
-        w1 = inner * (1 - 2 * side_pane_frac),
-        w2 = inner * side_pane_frac,
-        c0 = -window_w() / 2 + m + w0 / 2,
-        c1 = c0 + w0 / 2 + m + w1 / 2,
-        c2 = c1 + w1 / 2 + m + w2 / 2
-    )
-        [[c0, w0], [c1, w1], [c2, w2]];
+module pane_muntins_2d(w, h) {
+    difference() {
+        square([w, h], center = true);
+        pw = (w - (window_cols + 1) * muntin) / window_cols;
+        ph = (h - (window_rows + 1) * muntin) / window_rows;
+        for (c = [0:window_cols - 1], r = [0:window_rows - 1])
+            translate([
+                -w / 2 + muntin + c * (pw + muntin) + pw / 2,
+                -h / 2 + muntin + r * (ph + muntin) + ph / 2
+            ])
+                square([pw, ph], center = true);
+    }
+}
 
-function row_pane_h() =
-    (window_h() - (window_rows + 1) * muntin) / window_rows;
+module pane_glass_2d(w, h) {
+    pw = (w - (window_cols + 1) * muntin) / window_cols;
+    ph = (h - (window_rows + 1) * muntin) / window_rows;
+    for (c = [0:window_cols - 1], r = [0:window_rows - 1])
+        translate([
+            -w / 2 + muntin + c * (pw + muntin) + pw / 2,
+            -h / 2 + muntin + r * (ph + muntin) + ph / 2
+        ])
+            square([pw, ph], center = true);
+}
 
-function row_center(r) =
-    let (ph = row_pane_h(), m = muntin)
-        -window_h() / 2 + m + r * (ph + m) + ph / 2;
-
-module window_panel_2d() {
-    translate([0, window_z()])
+module two_bay_windows_2d() {
+    translate([left_door_cx(), window_z()])
+        square([window_w(), window_h()], center = true);
+    translate([right_door_cx(), window_z()])
         square([window_w(), window_h()], center = true);
 }
 
-module pane_holes_2d() {
-    cols = col_spec();
-    ph = row_pane_h();
-    translate([0, window_z()])
-        for (c = cols)
-            for (r = [0:window_rows - 1])
-                translate([c[0], row_center(r)])
-                    square([c[1], ph], center = true);
+module right_window_muntins_2d() {
+    translate([right_door_cx(), window_z()])
+        pane_muntins_2d(window_w(), window_h());
 }
 
-module pane_muntins_2d() {
-    difference() {
-        window_panel_2d();
-        pane_holes_2d();
-    }
+module right_window_glass_2d() {
+    translate([right_door_cx(), window_z()])
+        pane_glass_2d(window_w(), window_h());
+}
+
+module left_window_frame_2d() {
+    translate([left_door_cx(), window_z()])
+        difference() {
+            square([window_w(), window_h()], center = true);
+            square([flag_w(), flag_h()], center = true);
+        }
+}
+
+module panel_squares_2d() {
+    pw = door_w() - 2 * panel_inset;
+    ph = row_h() - panel_gap;
+    for (bay = [left_door_cx(), right_door_cx()])
+        for (row = [0:2])
+            translate([bay, plinth_h + row * row_h() + row_h() / 2])
+                square([pw, ph], center = true);
 }
 
 module sign_plate_2d() {
@@ -329,8 +349,9 @@ module uk_flag_frame_2d(w, h, t) {
 }
 
 module flag_at_2d() {
-    translate([0, flag_z()])
-        children();
+    translate([left_door_cx(), window_z()])
+        mirror([1, 0])
+            children();
 }
 
 // Bold Tudor-crown silhouette so it still reads at ~15 mm.
@@ -489,15 +510,23 @@ module interior_cavity() {
 }
 
 module door_reveal_cut() {
-    translate([door_gap_x(), body_d / 2 - 2.0, plinth_h + 1.2])
-        cube([1.4, 2.3, post_h - 2.4]);
+    translate([-door_gap / 2, body_d / 2 - 2.2, plinth_h + 1])
+        cube([door_gap, 2.4, post_h - 2]);
 }
-
-function door_gap_x() = inner_w() / 2 - 1.6;
 
 module handle_cut() {
     translate([handle_x(), body_d / 2 - 1.6, handle_z()])
         cube([7.2, 3.2, 18], center = true);
+}
+
+function glass_back_d() = window_pocket_d - muntin_d - 0.1;
+function glass_shift() = muntin_d + 0.1;
+
+module flag_inlay(d) {
+    translate([0, -glass_shift(), 0])
+        front_inlay(d)
+            flag_at_2d()
+                children();
 }
 
 module red_part() {
@@ -507,25 +536,22 @@ module red_part() {
             interior_cavity();
             scrunchy_slot_cut();
             door_reveal_cut();
-            front_inlay(window_pocket_d + 0.05) window_panel_2d();
+            front_inlay(window_pocket_d + 0.05) two_bay_windows_2d();
+            front_inlay(panel_recess) panel_squares_2d();
             front_inlay(sign_d + sign_recess + 0.05) sign_plate_2d();
             front_inlay(1.1) vent_slots_2d();
             four_crowns(crown_d + 0.12);
             handle_cut();
             back_inlay(sign_d + sign_recess + 0.05) sign_plate_2d();
-            back_inlay(flag_d + 0.08)
-                flag_at_2d()
-                    square([flag_w + 2 * flag_frame, flag_h + 2 * flag_frame],
-                           center = true);
         }
-        back_inlay(flag_d)
-            flag_at_2d()
-                uk_flag_red_2d(flag_w, flag_h);
+        flag_inlay(glass_back_d())
+            uk_flag_red_2d(flag_w(), flag_h());
     }
 }
 
 module white_part() {
-    front_inlay(muntin_d) pane_muntins_2d();
+    translate([0, -glass_shift(), 0])
+        front_inlay(glass_back_d()) right_window_glass_2d();
 
     translate([0, -sign_recess, 0])
         front_inlay(sign_d)
@@ -541,25 +567,18 @@ module white_part() {
                 back_sign_letters_2d();
             }
 
-    back_inlay(flag_d)
-        flag_at_2d()
-            union() {
-                uk_flag_white_2d(flag_w, flag_h);
-                uk_flag_frame_2d(flag_w, flag_h, flag_frame);
-            }
+    flag_inlay(glass_back_d())
+        uk_flag_white_2d(flag_w(), flag_h());
 }
 
 module blue_part() {
-    back_inlay(flag_d)
-        flag_at_2d()
-            uk_flag_blue_2d(flag_w, flag_h);
+    flag_inlay(glass_back_d())
+        uk_flag_blue_2d(flag_w(), flag_h());
 }
 
 module black_part() {
-    back_d = window_pocket_d - muntin_d - 0.1;
-    shift = muntin_d + 0.1;
-    translate([0, -shift, 0])
-        front_inlay(back_d) pane_holes_2d();
+    front_inlay(muntin_d) right_window_muntins_2d();
+    front_inlay(muntin_d) left_window_frame_2d();
 
     translate([0, -sign_recess, 0])
         front_inlay(sign_d)
