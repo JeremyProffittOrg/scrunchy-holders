@@ -1,5 +1,8 @@
 print/*.png
 !print/tardis_preview.png
 !print/tardis_34.png
+!print/uk_phone_booth_preview.png
+!print/uk_phone_booth_front.png
+!print/uk_phone_booth_back.png
 print/guide-pages/
 scripts/__pycache__/
