@@ -1,9 +1,10 @@
 // UK K6 red telephone-box scrunchy holder.
-// Front reads as a Giles Gilbert Scott K6 with TARDIS-style two-bay
-// windows (2 x 3 panes, black muntins, white glass). The left window
-// holds a Union Flag. The box is a hollow shell. Left and right sides
-// each have a scrunchy slide: a 40% wide centered channel with 90% x
-// 25mm loading slots, 5mm from the top and bottom, rounded corners.
+// Front reads as a Giles Gilbert Scott K6. Light panels are 2 x 2
+// (one vertical and one horizontal black bar, white glass). One front
+// window holds a Union Flag; a larger flag sits on the back. The box
+// is a hollow shell. Left and right sides each have a scrunchy slide:
+// a 40% wide centered channel with 90% x 25mm loading slots, 5mm from
+// the top and bottom, rounded corners.
 //
 // Export parts for Bambu AMS (same origin, complementary volumes):
 //   openscad -D PART=\"red\"   -o print/uk_phone_booth_red.stl   cad/uk_phone_booth.scad
@@ -41,13 +42,10 @@ slot_slide_frac = 0.40;
 slot_end_frac = 0.90;
 slot_corner_r = 5;
 
-panel_inset = 2.4;
-panel_gap = 2.2;
-panel_recess = 1.7;
-door_gap = 1.5;
+door_gap = 0;
 window_margin = 2.2;
 window_cols = 2;
-window_rows = 3;
+window_rows = 2;
 muntin = 1.35;
 window_pocket_d = 3.6;
 muntin_d = 1.5;
@@ -73,12 +71,15 @@ function window_h() = row_h() - 2 * window_margin;
 function window_z() = plinth_h + 3 * row_h() + row_h() / 2;
 function flag_w() = window_w() - 2 * muntin;
 function flag_h() = window_h() - 2 * muntin;
+function back_flag_w() = inner_w() - 4;
+function back_flag_h() = back_flag_w() * 3 / 5;
+function back_flag_z() = plinth_h + post_h * 0.52;
+back_flag_frame = 2.2;
+back_flag_d = 1.8;
 function sign_z() = plinth_h + post_h + sign_h / 2;
 function roof_z0() = body_h();
 function crown_z() = roof_z0() + pediment_h * 0.36;
 function dome_peak_z() = roof_z0() + pediment_h + 3.2;
-function handle_z() = plinth_h + post_h * 0.44;
-function handle_x() = -(body_w / 2 - post_w - 7.5);
 function pediment_face() = body_d / 2 + 0.8;
 
 module rounded_rect(w, h, r) {
@@ -193,50 +194,37 @@ module pane_glass_2d(w, h, cols, rows) {
             square([pw, ph], center = true);
 }
 
-module two_bay_windows_2d() {
-    translate([left_door_cx(), window_z()])
-        square([window_w(), window_h()], center = true);
-    translate([right_door_cx(), window_z()])
+module light_panel_grid_2d(skip_jack) {
+    for (bi = [0, 1], row = [0:3])
+        if (!(skip_jack && bi == 0 && row == 3))
+            translate([
+                (bi == 0) ? left_door_cx() : right_door_cx(),
+                plinth_h + row * row_h() + row_h() / 2
+            ])
+                children();
+}
+
+module all_window_squares_2d() {
+    light_panel_grid_2d(false)
         square([window_w(), window_h()], center = true);
 }
 
-module right_window_muntins_2d() {
-    translate([right_door_cx(), window_z()])
+module all_window_muntins_2d() {
+    light_panel_grid_2d(true)
         pane_muntins_2d(window_w(), window_h(), window_cols, window_rows);
 }
 
-module right_window_glass_2d() {
-    translate([right_door_cx(), window_z()])
+module all_window_glass_2d() {
+    light_panel_grid_2d(true)
         pane_glass_2d(window_w(), window_h(), window_cols, window_rows);
 }
 
-module left_window_frame_2d() {
+module jack_window_frame_2d() {
     translate([left_door_cx(), window_z()])
         difference() {
             square([window_w(), window_h()], center = true);
             square([flag_w(), flag_h()], center = true);
         }
-}
-
-module panel_squares_2d() {
-    for (bay = [left_door_cx(), right_door_cx()])
-        for (row = [0:2])
-            translate([bay, plinth_h + row * row_h() + row_h() / 2])
-                square([window_w(), window_h()], center = true);
-}
-
-module panel_muntins_2d() {
-    for (bay = [left_door_cx(), right_door_cx()])
-        for (row = [0:2])
-            translate([bay, plinth_h + row * row_h() + row_h() / 2])
-                pane_muntins_2d(window_w(), window_h(), window_cols, 1);
-}
-
-module panel_glass_2d() {
-    for (bay = [left_door_cx(), right_door_cx()])
-        for (row = [0:2])
-            translate([bay, plinth_h + row * row_h() + row_h() / 2])
-                pane_glass_2d(window_w(), window_h(), window_cols, 1);
 }
 
 module sign_plate_2d() {
@@ -364,6 +352,11 @@ module flag_at_2d() {
     translate([left_door_cx(), window_z()])
         mirror([1, 0])
             children();
+}
+
+module back_flag_at_2d() {
+    translate([0, back_flag_z()])
+        children();
 }
 
 // Bold Tudor-crown silhouette so it still reads at ~15 mm.
@@ -521,16 +514,6 @@ module interior_cavity() {
         cube([x1 - x0, y1 - y0, z1 - z0]);
 }
 
-module door_reveal_cut() {
-    translate([-door_gap / 2, body_d / 2 - 2.2, plinth_h + 1])
-        cube([door_gap, 2.4, post_h - 2]);
-}
-
-module handle_cut() {
-    translate([handle_x(), body_d / 2 - 1.6, handle_z()])
-        cube([7.2, 3.2, 18], center = true);
-}
-
 function glass_back_d() = window_pocket_d - muntin_d - 0.1;
 function glass_shift() = muntin_d + 0.1;
 
@@ -547,25 +530,29 @@ module red_part() {
             red_solid();
             interior_cavity();
             scrunchy_slot_cut();
-            door_reveal_cut();
-            front_inlay(window_pocket_d + 0.05) two_bay_windows_2d();
-            front_inlay(window_pocket_d + 0.05) panel_squares_2d();
+            front_inlay(window_pocket_d + 0.05) all_window_squares_2d();
             front_inlay(sign_d + sign_recess + 0.05) sign_plate_2d();
             front_inlay(1.1) vent_slots_2d();
             four_crowns(crown_d + 0.12);
-            handle_cut();
             back_inlay(sign_d + sign_recess + 0.05) sign_plate_2d();
+            back_inlay(back_flag_d + 0.08)
+                back_flag_at_2d()
+                    square([
+                        back_flag_w() + 2 * back_flag_frame,
+                        back_flag_h() + 2 * back_flag_frame
+                    ], center = true);
         }
         flag_inlay(glass_back_d())
             uk_flag_red_2d(flag_w(), flag_h());
+        back_inlay(back_flag_d)
+            back_flag_at_2d()
+                uk_flag_red_2d(back_flag_w(), back_flag_h());
     }
 }
 
 module white_part() {
     translate([0, -glass_shift(), 0])
-        front_inlay(glass_back_d()) right_window_glass_2d();
-    translate([0, -glass_shift(), 0])
-        front_inlay(glass_back_d()) panel_glass_2d();
+        front_inlay(glass_back_d()) all_window_glass_2d();
 
     translate([0, -sign_recess, 0])
         front_inlay(sign_d)
@@ -583,17 +570,25 @@ module white_part() {
 
     flag_inlay(glass_back_d())
         uk_flag_white_2d(flag_w(), flag_h());
+    back_inlay(back_flag_d)
+        back_flag_at_2d()
+            union() {
+                uk_flag_white_2d(back_flag_w(), back_flag_h());
+                uk_flag_frame_2d(back_flag_w(), back_flag_h(), back_flag_frame);
+            }
 }
 
 module blue_part() {
     flag_inlay(glass_back_d())
         uk_flag_blue_2d(flag_w(), flag_h());
+    back_inlay(back_flag_d)
+        back_flag_at_2d()
+            uk_flag_blue_2d(back_flag_w(), back_flag_h());
 }
 
 module black_part() {
-    front_inlay(muntin_d) right_window_muntins_2d();
-    front_inlay(muntin_d) left_window_frame_2d();
-    front_inlay(muntin_d) panel_muntins_2d();
+    front_inlay(muntin_d) all_window_muntins_2d();
+    front_inlay(muntin_d) jack_window_frame_2d();
 
     translate([0, -sign_recess, 0])
         front_inlay(sign_d)
@@ -604,29 +599,8 @@ module black_part() {
             back_sign_letters_2d();
 }
 
-module gold_handle() {
-    hx = handle_x();
-    hy = body_d / 2 + 0.2;
-    hz = handle_z();
-    translate([hx, hy, hz]) {
-        hull() {
-            translate([0, 0, 7.2])
-                rotate([90, 0, 0])
-                    cylinder(h = 4.2, r = 1.55, $fn = 20);
-            translate([0, 0, -7.2])
-                rotate([90, 0, 0])
-                    cylinder(h = 4.2, r = 1.55, $fn = 20);
-        }
-        translate([0, -2.7, 7.2])
-            sphere(r = 1.7, $fn = 16);
-        translate([0, -2.7, -7.2])
-            sphere(r = 1.7, $fn = 16);
-    }
-}
-
 module gold_part() {
     four_crowns(crown_d);
-    gold_handle();
     translate([0, 0, dome_peak_z() + lamp_ball_r * 0.55])
         sphere(r = lamp_ball_r, $fn = 24);
 }
