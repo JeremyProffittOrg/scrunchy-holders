@@ -168,12 +168,12 @@ module right_inlay(d) {
             children();
 }
 
-module pane_muntins_2d(w, h) {
+module pane_muntins_2d(w, h, cols, rows) {
     difference() {
         square([w, h], center = true);
-        pw = (w - (window_cols + 1) * muntin) / window_cols;
-        ph = (h - (window_rows + 1) * muntin) / window_rows;
-        for (c = [0:window_cols - 1], r = [0:window_rows - 1])
+        pw = (w - (cols + 1) * muntin) / cols;
+        ph = (h - (rows + 1) * muntin) / rows;
+        for (c = [0:cols - 1], r = [0:rows - 1])
             translate([
                 -w / 2 + muntin + c * (pw + muntin) + pw / 2,
                 -h / 2 + muntin + r * (ph + muntin) + ph / 2
@@ -182,10 +182,10 @@ module pane_muntins_2d(w, h) {
     }
 }
 
-module pane_glass_2d(w, h) {
-    pw = (w - (window_cols + 1) * muntin) / window_cols;
-    ph = (h - (window_rows + 1) * muntin) / window_rows;
-    for (c = [0:window_cols - 1], r = [0:window_rows - 1])
+module pane_glass_2d(w, h, cols, rows) {
+    pw = (w - (cols + 1) * muntin) / cols;
+    ph = (h - (rows + 1) * muntin) / rows;
+    for (c = [0:cols - 1], r = [0:rows - 1])
         translate([
             -w / 2 + muntin + c * (pw + muntin) + pw / 2,
             -h / 2 + muntin + r * (ph + muntin) + ph / 2
@@ -202,12 +202,12 @@ module two_bay_windows_2d() {
 
 module right_window_muntins_2d() {
     translate([right_door_cx(), window_z()])
-        pane_muntins_2d(window_w(), window_h());
+        pane_muntins_2d(window_w(), window_h(), window_cols, window_rows);
 }
 
 module right_window_glass_2d() {
     translate([right_door_cx(), window_z()])
-        pane_glass_2d(window_w(), window_h());
+        pane_glass_2d(window_w(), window_h(), window_cols, window_rows);
 }
 
 module left_window_frame_2d() {
@@ -219,12 +219,24 @@ module left_window_frame_2d() {
 }
 
 module panel_squares_2d() {
-    pw = door_w() - 2 * panel_inset;
-    ph = row_h() - panel_gap;
     for (bay = [left_door_cx(), right_door_cx()])
         for (row = [0:2])
             translate([bay, plinth_h + row * row_h() + row_h() / 2])
-                square([pw, ph], center = true);
+                square([window_w(), window_h()], center = true);
+}
+
+module panel_muntins_2d() {
+    for (bay = [left_door_cx(), right_door_cx()])
+        for (row = [0:2])
+            translate([bay, plinth_h + row * row_h() + row_h() / 2])
+                pane_muntins_2d(window_w(), window_h(), window_cols, 1);
+}
+
+module panel_glass_2d() {
+    for (bay = [left_door_cx(), right_door_cx()])
+        for (row = [0:2])
+            translate([bay, plinth_h + row * row_h() + row_h() / 2])
+                pane_glass_2d(window_w(), window_h(), window_cols, 1);
 }
 
 module sign_plate_2d() {
@@ -537,7 +549,7 @@ module red_part() {
             scrunchy_slot_cut();
             door_reveal_cut();
             front_inlay(window_pocket_d + 0.05) two_bay_windows_2d();
-            front_inlay(panel_recess) panel_squares_2d();
+            front_inlay(window_pocket_d + 0.05) panel_squares_2d();
             front_inlay(sign_d + sign_recess + 0.05) sign_plate_2d();
             front_inlay(1.1) vent_slots_2d();
             four_crowns(crown_d + 0.12);
@@ -552,6 +564,8 @@ module red_part() {
 module white_part() {
     translate([0, -glass_shift(), 0])
         front_inlay(glass_back_d()) right_window_glass_2d();
+    translate([0, -glass_shift(), 0])
+        front_inlay(glass_back_d()) panel_glass_2d();
 
     translate([0, -sign_recess, 0])
         front_inlay(sign_d)
@@ -579,6 +593,7 @@ module blue_part() {
 module black_part() {
     front_inlay(muntin_d) right_window_muntins_2d();
     front_inlay(muntin_d) left_window_frame_2d();
+    front_inlay(muntin_d) panel_muntins_2d();
 
     translate([0, -sign_recess, 0])
         front_inlay(sign_d)
