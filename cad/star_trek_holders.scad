@@ -1,11 +1,10 @@
 // Star Trek themed scrunchy holders. VARIANT 1..5.
-// Slots on ±X, character on ±Y.
 
 include <holder_core.scad>
 
 VARIANT = 1;
-$fa = 8;
-$fs = 0.55;
+$fa = 6;
+$fs = 0.45;
 
 C_HULL  = "#C8CCD0";
 C_NAC   = "#D8DCE0";
@@ -19,141 +18,180 @@ C_CORE  = "#5BE0E8";
 C_CORE2 = "#1A6A78";
 C_COMM  = "#8A1E1E";
 C_SILV  = "#B0B6BC";
+C_GLOW  = "#6A8A4A";
 
-module delta_2d(s = 1) {
-    scale(s)
-        polygon([
-            [0, 22],
-            [16, -14],
-            [5, -14],
-            [0, -4],
-            [-5, -14],
-            [-16, -14]
-        ]);
-}
-
-// 1. Constitution totem: engineering hull as the holder, saucer on top,
-//    nacelles on ±Y so the slots stay clear.
 module st_enterprise() {
-    w = 82; d = 82; h = 150;
+    w = 82; d = 82; h = 148;
     painted(C_HULL, w, d, h, "cyl") {
-        frustum_cyl(70, 82, 20, 36);
-        translate([0, 0, 20])
-            cylinder(h = h - 20, d = w, $fn = 36);
+        frustum_cyl(68, 82, 18, 40);
+        translate([0, 0, 18])
+            cylinder(h = h - 18, d = w, $fn = 40);
     }
     color(C_NAVY)
-        translate([0, d / 2 + 0.4, 70])
+        translate([0, d / 2 + 0.6, 72])
             rotate([90, 0, 0])
-                linear_extrude(height = 2.2)
-                    delta_2d(1.15);
+                linear_extrude(height = 2.6)
+                    starfleet_delta_2d(1.2);
     color("#6EC8FF")
-        translate([0, d / 2 + 0.6, 28])
+        translate([0, d / 2 + 1.0, 26])
             rotate([90, 0, 0])
-                cylinder(h = 2, d = 24, $fn = 24);
-    color(C_HULL)
+                cylinder(h = 2.4, d = 22, $fn = 24);
+    color(C_BLK)
+        wrap_band(d / 2 + 0.8, 50, -45, 20, 12)
+            cube([4, 1.8, 3], center = true);
+    color(C_HULL) {
         translate([0, 0, h])
-            cylinder(h = 16, d = 118, $fn = 44);
+            cylinder(h = 14, d = 118, $fn = 48);
+        translate([0, 0, h + 14])
+            cylinder(h = 4, d = 42, $fn = 28);
+    }
     color(C_NAVY)
-        translate([0, 0, h + 16])
-            cylinder(h = 4, d = 40, $fn = 28);
+        translate([0, 0, h + 14])
+            cylinder(h = 4.2, d = 38, $fn = 28);
+    color(C_BLK)
+        for (a = [0:15:345])
+            rotate([0, 0, a])
+                translate([52, 0, h + 7])
+                    cube([4, 2.2, 2.2], center = true);
     color(C_NAC)
         for (s = [-1, 1])
-            translate([0, s * (d / 2 + 16), 40])
-                cylinder(h = 90, d = 18, $fn = 24);
+            translate([0, s * (d / 2 + 16), 36]) {
+                cylinder(h = 92, d = 18, $fn = 24);
+                translate([0, s * 2, 46])
+                    cube([8, 10, 40], center = true);
+            }
     color(C_RED)
         for (s = [-1, 1])
-            translate([0, s * (d / 2 + 16), 130])
-                sphere(d = 18, $fn = 16);
+            translate([0, s * (d / 2 + 16), 128])
+                sphere(d = 18, $fn = 18);
+    color("#4A6A8A")
+        for (s = [-1, 1])
+            translate([0, s * (d / 2 + 16), 40])
+                cylinder(h = 8, d = 16, $fn = 20);
 }
 
-// 2. Communicator: thick standing slab, grill and hero button on +Y.
 module st_communicator() {
-    w = 90; d = 88; h = 150;
+    w = 90; d = 88; h = 148;
     painted(C_COMM, w, d, h, "box")
         rounded_xy_cube(w, d, h, 8);
-    color(C_SILV)
-        translate([0, d / 2 + 0.4, 96])
-            cube([64, 2.2, 70], center = true);
-    color(C_GOLD)
-        translate([0, d / 2 + 1.6, 118])
-            cylinder(h = 3, d = 18, $fn = 24);
-    color(C_BLK)
-        for (row = [0:5])
-            translate([0, d / 2 + 1.4, 58 + row * 6])
-                cube([48, 1.8, 2.4], center = true);
-    color(C_SILV)
+    color(C_SILV) {
+        front_inlay(d, 2.8)
+            translate([0, 108])
+                square([70, 52], center = true);
+        for (i = [0:5])
+            translate([0, d / 2 + 3.2, 108])
+                rotate([90, 0, 0])
+                    ring(28 - i * 4, 24 - i * 4, 1.6, 28);
         translate([0, 0, h])
             rounded_xy_cube(w - 6, d - 6, 8, 6);
-    color(C_GOLD)
+    }
+    color(C_GOLD) {
+        translate([0, d / 2 + 4.2, 118])
+            rotate([90, 0, 0])
+                cylinder(h = 3.2, d = 16, $fn = 24);
         translate([0, d / 2 - 2, h + 8])
-            cube([40, 8, 4], center = true);
+            cube([36, 8, 4], center = true);
+        front_inlay(d, 2.4)
+            translate([0, 118])
+                starfleet_delta_2d(0.55);
+    }
+    color(C_BLK)
+        for (row = [0:6])
+            translate([0, d / 2 + 2.2, 52 + row * 5.5])
+                cube([52, 2.0, 2.6], center = true);
+    color(C_GOLD)
+        wrap_y(d / 2 + 1.4, 24, -30)
+            cube([18, 2.4, 8], center = true);
 }
 
-// 3. Borg cube: greebled cube, green-grey, slots punch two faces.
 module st_borg() {
     w = 100; d = 100; h = 100;
     painted(C_BORG, w, d, h, "box")
         body_cube(w, d, h);
     color(C_GREEB) {
-        translate([18, 16, h + 5])
-            cube([28, 24, 12], center = true);
-        translate([-22, -12, h + 7])
-            cube([20, 32, 16], center = true);
-        translate([8, -24, h + 4])
-            cube([16, 16, 10], center = true);
-        translate([-8, 28, h / 2])
-            cube([18, 8, 22], center = true);
-        for (i = [0:5]) {
-            x = -28 + (i % 3) * 22;
-            z = 22 + floor(i / 3) * 32;
-            translate([x, d / 2 + 1.2, z])
-                cube([16 + (i % 2) * 6, 4, 12 + (i % 2) * 8], center = true);
+        translate([20, 18, h + 6]) cube([30, 26, 14], center = true);
+        translate([-22, -14, h + 8]) cube([22, 34, 18], center = true);
+        translate([6, -26, h + 4]) cube([18, 16, 10], center = true);
+        translate([-12, 30, h / 2]) cube([20, 10, 26], center = true);
+        translate([28, -8, 40]) cube([12, 40, 10], center = true);
+        for (i = [0:8]) {
+            x = -32 + (i % 3) * 24;
+            z = 18 + floor(i / 3) * 26;
+            translate([x, d / 2 + 1.6, z])
+                cube([18 + (i % 2) * 6, 4.2, 12 + (i % 3) * 5], center = true);
         }
+        wrap_y(d / 2 + 2.0, 70, -40)
+            cube([16, 5, 28], center = true);
+        wrap_y(d / 2 + 2.0, 36, -40)
+            cube([22, 5, 16], center = true);
     }
-    color("#6A8A4A")
-        translate([16, d / 2 + 1.4, 58])
-            cube([22, 3.2, 22], center = true);
+    color(C_GLOW) {
+        translate([18, d / 2 + 2.2, 58])
+            cube([20, 3.4, 20], center = true);
+        translate([-8, 12, h + 12])
+            cube([14, 14, 4], center = true);
+        wrap_y(d / 2 + 2.4, 70, -40)
+            cube([8, 2.2, 10], center = true);
+    }
 }
 
-// 4. Starfleet delta: rounded body with a large extruded chevron on +Y.
 module st_delta() {
-    w = 90; d = 88; h = 160;
+    w = 90; d = 88; h = 158;
     painted(C_NAVY, w, d, h, "box")
         rounded_xy_cube(w, d, h, 10);
-    color(C_GOLD)
-        translate([0, d / 2 + 0.2, 88])
+    color(C_GOLD) {
+        translate([0, d / 2 + 0.4, 92])
             rotate([90, 0, 0])
-                linear_extrude(height = 6)
-                    delta_2d(2.4);
-    color(C_HULL)
-        translate([0, d / 2 + 0.4, 28])
-            cube([50, 2.2, 8], center = true);
-    color(C_GOLD)
+                linear_extrude(height = 8)
+                    starfleet_delta_2d(2.55);
         translate([0, 0, h])
-            cylinder(h = 8, d = 36, $fn = 6);
+            cylinder(h = 8, d = 40, $fn = 6);
+        wrap_y(d / 2 + 1.4, 28, -28)
+            cube([22, 2.6, 8], center = true);
+    }
+    color(C_HULL)
+        front_inlay(d, 1.8)
+            translate([0, 28])
+                square([54, 8], center = true);
+    color("#D8E4F0")
+        for (i = [0:18])
+            translate([
+                -30 + (i % 7) * 10,
+                d / 2 + 1.2,
+                48 + floor(i / 7) * 14
+            ])
+                sphere(d = 2.4, $fn = 8);
 }
 
-// 5. Warp core: stacked torus rings around a glowing column.
 module st_warp_core() {
-    w = 86; d = 86; h = 176;
+    w = 86; d = 86; h = 172;
     painted(C_CORE2, w, d, h, "cyl")
-        cylinder(h = h, d = w, $fn = 36);
+        cylinder(h = h, d = w, $fn = 40);
     painted(C_CORE, w, d, h, "cyl")
         translate([0, 0, h / 2])
-            cylinder(h = 36, d = w - 8, $fn = 36, center = true);
+            cylinder(h = 40, d = w - 10, $fn = 40, center = true);
     painted("#C8D0D4", w, d, h, "cyl")
-        for (z = [18, 46, 110, 138, 162])
+        for (z = [16, 44, 108, 136, 160])
             translate([0, 0, z])
-                torus(w / 2 + 2, 5.5, 28);
+                torus(w / 2 + 2, 5.2, 28);
+    color("#C8D0D4")
+        for (z = [16, 44, 108, 136, 160])
+            for (a = [0:45:315])
+                if (abs(cos(a)) < 0.85)
+                    rotate([0, 0, a])
+                        translate([w / 2 + 1, 0, z])
+                            cube([8, 2.2, 10], center = true);
     color(C_GOLD) {
-        translate([0, 0, 0])
-            cylinder(h = 10, d = w + 10, $fn = 36);
+        cylinder(h = 10, d = w + 12, $fn = 40);
         translate([0, 0, h])
-            cylinder(h = 10, d = w + 6, $fn = 36);
+            cylinder(h = 10, d = w + 8, $fn = 40);
     }
     color(C_CORE)
         translate([0, 0, h + 10])
             sphere(d = 22, $fn = 20);
+    color(C_RED)
+        wrap_band(d / 2 + 0.9, 86, -40, 20, 18)
+            cube([10, 2.0, 4], center = true);
 }
 
 module assembly() {
